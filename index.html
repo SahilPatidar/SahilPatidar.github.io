@@ -1,0 +1,116 @@
+<h1 class="code-line" data-line-start=1 data-line-end=2 ><a id="GSoC_2024_Final_Report_Improving_ClangRepl_with_OutOfProcess_Execution_1"></a><strong>GSoC 2024 Final Report: Improving Clang-Repl with Out-Of-Process Execution</strong></h1>
+<h3 class="code-line" data-line-start=3 data-line-end=4 ><a id="Introduction_3"></a><strong>Introduction</strong></h3>
+<p class="has-line-data" data-line-start="5" data-line-end="8">Hello! I’m Sahil Patidar, and this summer I had the exciting opportunity to<br>
+participate in Google Summer of Code (GSoC) 2024. My project revolved around<br>
+enhancing Clang-Repl by introducing Out-Of-Process Execution.</p>
+<p class="has-line-data" data-line-start="9" data-line-end="10">Mentors: Vassil Vassilev and Matheus Izvekov</p>
+<h3 class="code-line" data-line-start=11 data-line-end=12 ><a id="Project_Overview_11"></a><strong>Project Overview</strong></h3>
+<p class="has-line-data" data-line-start="13" data-line-end="14"><strong>Clang</strong> is a popular compiler front-end in the <strong>LLVM</strong> project, capable of handling languages like C++. One of its cool tools, <strong>Clang-Repl</strong>, is an interactive C++ interpreter using <strong>Just-In-Time (JIT)</strong> compilation. It lets you write, compile, and run C++ code interactively, making it super handy for learning, quick prototyping, and debugging.</p>
+<p class="has-line-data" data-line-start="15" data-line-end="16">However, Clang-Repl did have a few drawbacks:</p>
+<ol>
+<li class="has-line-data" data-line-start="17" data-line-end="18"><strong>High Resource Usage</strong>: Running both Clang-Repl and JIT in the same process used up a lot of system resources.</li>
+<li class="has-line-data" data-line-start="18" data-line-end="20"><strong>Instability</strong>: If the user’s code crashed, the entire Clang-Repl session would shut down, leading to interruptions.</li>
+</ol>
+<h3 class="code-line" data-line-start=20 data-line-end=21 ><a id="OutOfProcess_Execution_20"></a><strong>Out-Of-Process Execution</strong></h3>
+<p class="has-line-data" data-line-start="22" data-line-end="24">The solution to these challenges was <strong>Out-Of-Process Execution</strong>—executing user code<br>
+in a separate process. This offers two major advantages:</p>
+<ul>
+<li class="has-line-data" data-line-start="25" data-line-end="28"><strong>Efficient Resource Management</strong>: By isolating code execution, Clang-Repl reduces<br>
+its system resource footprint, crucial for devices with limited memory or processing<br>
+power.</li>
+<li class="has-line-data" data-line-start="28" data-line-end="31"><strong>Enhanced Stability</strong>: Crashes in user code no longer affect the main Clang-Repl<br>
+session, improving reliability and user experience.</li>
+</ul>
+<p class="has-line-data" data-line-start="31" data-line-end="33">This improvement makes Clang-Repl more reliable, especially on low-power or embedded<br>
+systems, and suitable for broader use cases.</p>
+<hr>
+<h2 class="code-line" data-line-start=36 data-line-end=37 ><a id="Summary_of_accomplished_tasks_36"></a><strong>Summary of accomplished tasks</strong></h2>
+<h3 class="code-line" data-line-start=38 data-line-end=39 ><a id="Note_Some_of_the_PRs_are_still_under_review_but_they_are_expected_to_be_merged_soon_38"></a><strong>Note: Some of the PRs are still under review, but they are expected to be merged soon.</strong></h3>
+<h4 class="code-line" data-line-start=40 data-line-end=41 ><a id="Add_OutOfProcess_Execution_Support_for_ClangRepl_40"></a><strong>Add Out-Of-Process Execution Support for Clang-Repl</strong></h4>
+<p class="has-line-data" data-line-start="41" data-line-end="42"><strong>PR</strong>: <a href="https://github.com/llvm/llvm-project/pull/110418">#110418</a></p>
+<p class="has-line-data" data-line-start="43" data-line-end="44">To implement out-of-process execution in Clang-Repl, I utilized <strong>ORC JIT’s remote execution capabilities</strong> with the <code>llvm-jitlink-executor</code>. This enhancement introduced the following key features:</p>
+<ul>
+<li class="has-line-data" data-line-start="45" data-line-end="49"><strong>New Command Flags</strong>:
+<ul>
+<li class="has-line-data" data-line-start="46" data-line-end="47"><code>--oop-executor</code>: Initiates the JIT executor in a separate process.</li>
+<li class="has-line-data" data-line-start="47" data-line-end="49"><code>--oop-executor-connect</code>: Establishes a connection between Clang-Repl and the external process for out-of-process execution.</li>
+</ul>
+</li>
+</ul>
+<p class="has-line-data" data-line-start="49" data-line-end="50">These newly added flags allow Clang-Repl to leverage the <code>llvm-jitlink-executor</code> for executing code in an isolated environment, improving execution separation and flexibility.</p>
+<hr>
+<h3 class="code-line" data-line-start=53 data-line-end=54 ><a id="Key_ORC_JIT_Enhancements_53"></a><strong>Key ORC JIT Enhancements</strong></h3>
+<p class="has-line-data" data-line-start="55" data-line-end="56">To support Clang-Repl’s out-of-process execution, I contributed several improvements to <strong>ORC JIT</strong>:</p>
+<h4 class="code-line" data-line-start=57 data-line-end=58 ><a id="Incremental_Initializer_Execution_for_MachO_and_ELF_57"></a><strong>Incremental Initializer Execution for Mach-O and ELF</strong></h4>
+<p class="has-line-data" data-line-start="58" data-line-end="59"><a href="https://github.com/llvm/llvm-project/pull/97441">#97441</a>, <a href="https://github.com/llvm/llvm-project/pull/110406">#110406</a></p>
+<p class="has-line-data" data-line-start="60" data-line-end="61">The <code>dlupdate</code> function was introduced in the ORC runtime to support incremental execution of new initializers within the REPL environment. Unlike the traditional <code>dlopen</code> function, which handles tasks such as code mapping, library reference counting, and initializer execution, <code>dlupdate</code> is specifically focused on running only the new initializers. This targeted approach significantly improves efficiency, particularly in interactive environments like <code>clang-repl</code>, by reducing unnecessary operations and speeding up the update process.</p>
+<h4 class="code-line" data-line-start=62 data-line-end=63 ><a id="PushRequest_Model_for_ELF_Initializers_62"></a><strong>Push-Request Model for ELF Initializers</strong></h4>
+<p class="has-line-data" data-line-start="63" data-line-end="64"><strong>PR</strong>: <a href="https://github.com/llvm/llvm-project/pull/102846">#102846</a></p>
+<p class="has-line-data" data-line-start="65" data-line-end="66">A push-request model was introduced to manage ELF initializers in the runtime state for each <code>JITDylib</code>, similar to the handling of initializers in Mach-O and COFF. Previously, ELF required a fresh request for initializers each time <code>dlopen</code> was invoked, but lacked the ability to register, deregister, or retain these initializers. This led to issues when re-running <code>dlopen</code>, as initializers would be erased after <code>rt_getInitializers</code> was invoked, making subsequent executions impossible.</p>
+<p class="has-line-data" data-line-start="67" data-line-end="68">To address these issues, the following functions were introduced:</p>
+<ul>
+<li class="has-line-data" data-line-start="69" data-line-end="70"><strong><code>__orc_rt_elfnix_register_init_sections</code></strong>: This function registers ELF initializers for the <code>JITDylib</code>.</li>
+<li class="has-line-data" data-line-start="70" data-line-end="72"><strong><code>__orc_rt_elfnix_register_jitdylib</code></strong>: This function registers the <code>JITDylib</code> with the ELF runtime state.</li>
+</ul>
+<p class="has-line-data" data-line-start="72" data-line-end="73">With this push-request model, initializers for each <code>JITDylib</code> state can now be better tracked and managed. By leveraging Mach-O’s <code>RecordSectionsTracker</code>, we ensure that only newly registered initializers are run, significantly improving efficiency and reliability when working with ELF targets in <code>clang-repl</code>.</p>
+<p class="has-line-data" data-line-start="74" data-line-end="75">This update plays a key role in enabling out-of-process execution in <code>clang-repl</code> on ELF platforms, providing a more effective way to handle incremental execution.</p>
+<hr>
+<h3 class="code-line" data-line-start=78 data-line-end=79 ><a id="Additional_Improvements_78"></a><strong>Additional Improvements</strong></h3>
+<h4 class="code-line" data-line-start=80 data-line-end=81 ><a id="Issue_encountered_ORC_Fix_block_dependence_calculation_in_ObjectLinkingLayerhttpsgithubcomllvmllvmprojectcommit896dd322afcc1cf5dc4fa7375dedd55b59001eb4_Resolved_By_Lang_Hames_80"></a><strong>Issue encountered <a href="https://github.com/llvm/llvm-project/commit/896dd322afcc1cf5dc4fa7375dedd55b59001eb4">[ORC] Fix block dependence calculation in ObjectLinkingLayer.</a> Resolved By Lang Hames.</strong></h4>
+<h4 class="code-line" data-line-start=82 data-line-end=83 ><a id="Autoloading_Dynamic_Libraries_in_ORC_JIT_82"></a><strong>Auto-loading Dynamic Libraries in ORC JIT</strong></h4>
+<p class="has-line-data" data-line-start="83" data-line-end="84"><strong>PR</strong>: <a href="https://github.com/llvm/llvm-project/pull/109913">#109913</a> (On-going)</p>
+<p class="has-line-data" data-line-start="85" data-line-end="86">An auto-loading dynamic library feature was added to ORC JIT to enhance the speed of symbol resolution for both loaded and unloaded libraries. A key improvement introduced in this update is the global bloom filter, which helps reduce unnecessary symbol searches by skipping symbols that are unlikely to be present, thereby improving overall performance.</p>
+<p class="has-line-data" data-line-start="87" data-line-end="88">The updated system operates as follows: when the JIT attempts to resolve a symbol, it first checks the currently loaded libraries. If the symbol is found, its address is retrieved using <code>dlsym</code> and stored in the results. If the symbol is not found in the loaded libraries, the search automatically expands to include unloaded libraries.</p>
+<p class="has-line-data" data-line-start="89" data-line-end="90">As the symbol tables of these libraries are scanned, they are added to the global bloom filter. If the search through all possible auto-linkable libraries still does not yield the symbol, the bloom filter result is returned. Additionally, any symbols flagged by the bloom filter as “may-contain” but that do not actually resolve are added to an exclusion set, preventing redundant resolution attempts in the future.</p>
+<p class="has-line-data" data-line-start="91" data-line-end="92">This feature streamlines the symbol resolution process, reducing search overhead and improving performance in the ORC JIT system.</p>
+<h4 class="code-line" data-line-start=94 data-line-end=95 ><a id="Refactor_dlupdate_94"></a><strong>Refactor <code>dlupdate</code></strong></h4>
+<p class="has-line-data" data-line-start="95" data-line-end="96"><strong>PR</strong>: <a href="https://github.com/llvm/llvm-project/pull/110491">#110491</a></p>
+<p class="has-line-data" data-line-start="97" data-line-end="98">This update simplifies the <code>dlupdate</code> function by removing the <code>mode</code> argument, streamlining the function’s interface. The change enhances the clarity and usability of <code>dlupdate</code> by reducing unnecessary parameters, improving the overall maintainability of the code.</p>
+<hr>
+<h3 class="code-line" data-line-start=102 data-line-end=103 ><a id="Benchmarks_InProcess_vs_OutofProcess_Execution_102"></a><strong>Benchmarks: In-Process vs Out-of-Process Execution</strong></h3>
+<ul>
+<li class="has-line-data" data-line-start="104" data-line-end="105"><a href="https://gist.github.com/SahilPatidar/4870bf9968b1b0cb3dabcff7281e6135">Prime Finder</a></li>
+<li class="has-line-data" data-line-start="105" data-line-end="106"><a href="https://gist.github.com/SahilPatidar/2191963e59feb7dfa1314509340f95a1">Fibonacci Sequence</a></li>
+<li class="has-line-data" data-line-start="106" data-line-end="107"><a href="https://gist.github.com/SahilPatidar/1df9e219d0f8348bd126f1e01658b3fa">Matrix Multiplication</a></li>
+<li class="has-line-data" data-line-start="107" data-line-end="109"><a href="https://gist.github.com/SahilPatidar/c814634b2f863fc167b8d16b573f88ec">Sorting Algorithms</a></li>
+</ul>
+<hr>
+<h3 class="code-line" data-line-start=111 data-line-end=112 ><a id="Result_111"></a><strong>Result</strong></h3>
+<p class="has-line-data" data-line-start="113" data-line-end="114">With the implemented changes, <code>clang-repl</code> now supports out-of-process execution. This functionality can be invoked using the following command:</p>
+<pre><code class="has-line-data" data-line-start="116" data-line-end="118" class="language-bash">clang-repl --oop-executor=path/to/llvm-jitlink-executor --orc-runtime=path/to/liborc_rt.a
+</code></pre>
+<p class="has-line-data" data-line-start="119" data-line-end="120">This allows for isolated and efficient code execution via the <code>llvm-jitlink-executor</code>.</p>
+<h3 class="code-line" data-line-start=122 data-line-end=123 ><a id="Future_Work_122"></a><strong>Future Work</strong></h3>
+<ul>
+<li class="has-line-data" data-line-start="124" data-line-end="127">
+<p class="has-line-data" data-line-start="124" data-line-end="126"><strong>Crash Recovery and Session Continuation :</strong><br>
+Investigate and develop ways to enhance crash recovery so that if something goes wrong, the session can seamlessly resume without losing progress. This involves exploring options for an automatic process to restart the executor in the event of a crash.</p>
+</li>
+<li class="has-line-data" data-line-start="127" data-line-end="130">
+<p class="has-line-data" data-line-start="127" data-line-end="129"><strong>Finalize Auto Library Loading in ORC JIT :</strong><br>
+Wrap up the feature that automatically loads libraries in ORC JIT. This will streamline symbol resolution for both loaded and unloaded dynamic libraries by ensuring that any required dylibs containing symbol definitions are loaded as needed.</p>
+</li>
+</ul>
+<h3 class="code-line" data-line-start=130 data-line-end=131 ><a id="Conclusion_130"></a><strong>Conclusion</strong></h3>
+<p class="has-line-data" data-line-start="132" data-line-end="135">Thanks to this project, <strong>Clang-Repl</strong> now supports <strong>out-of-process execution</strong> for<br>
+both <code>ELF</code> and <code>Mach-O</code>, vastly improving its resource efficiency and stability. These<br>
+changes make Clang-Repl more robust, especially on low-resource devices.</p>
+<p class="has-line-data" data-line-start="136" data-line-end="138">Looking ahead, I plan to focus on automating library loading and further enhancing<br>
+ORC-JIT to optimize Clang-Repl’s out-of-process execution.</p>
+<p class="has-line-data" data-line-start="139" data-line-end="140">Thank you for being a part of my <strong>GSoC 2024</strong> journey!</p>
+<h3 class="code-line" data-line-start=141 data-line-end=142 ><a id="Acknowledgements_141"></a><strong>Acknowledgements</strong></h3>
+<p class="has-line-data" data-line-start="143" data-line-end="150">I would like to extend my deepest gratitude to Google Summer of Code (GSoC)<br>
+for the incredible opportunity to work on this project. A special thanks to<br>
+my mentors, Vassil Vassilev and Matheus Izvekov, for their invaluable guidance<br>
+and support throughout this journey. I am also immensely grateful to Lang Hames<br>
+for their expert insights on ORC-JIT enhancements for <code>clang-repl</code>. This experience<br>
+has been a pivotal moment in my development, and I am excited to continue<br>
+contributing to the open-source community.</p>
+<hr>
+<h3 class="code-line" data-line-start=153 data-line-end=154 ><a id="Related_Links_153"></a><strong>Related Links</strong></h3>
+<ul>
+<li class="has-line-data" data-line-start="155" data-line-end="156"><a href="https://github.com/llvm/llvm-project">LLVM Repository</a></li>
+<li class="has-line-data" data-line-start="156" data-line-end="157"><a href="https://discourse.llvm.org/t/clang-out-of-process-execution-for-clang-repl/68225">Project Description</a></li>
+<li class="has-line-data" data-line-start="157" data-line-end="159"><a href="https://github.com/SahilPatidar">My GitHub Profile</a></li>
+</ul>
+<hr>
