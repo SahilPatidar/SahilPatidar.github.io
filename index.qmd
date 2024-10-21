@@ -1,0 +1,17 @@
+title: "Sahil Patidar"
+image: /assets/images/sp.jpeg
+open-graph:
+  description: "About me"
+  image: /assets/images/sp.jpeg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/sahil-patidar/
+    - icon: github
+      text: GitHub
+      href: https://github.com/SahilPatidar/
+---
+
+I am a graduate from Vindhya Institute of Science and Technology, Indore, pursuing a Bachelor of Technology in Computer Science and Engineering. My passion lies in compiler development and system programming, particularly with LLVM. I enjoy programming, exploring new technologies, and contributing to open-source projects. Currently, I'm focused on areas like LLVM IR, optimizations, and the design and implementation of programming languages.

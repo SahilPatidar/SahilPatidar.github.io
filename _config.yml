@@ -1,4 +1,0 @@
-title: GSoC 2024 Final Report - Improving Clang-Repl with Out-Of-Process Execution
-description: Out of Process Execution for Clang-Repl project, part of Google Summer of Code 2024, aims to enhance Clang-Repl by implementing out-of-process execution. This will address issues of high resource consumption and instability, making Clang-Repl more suitable for low-power devices and more stable for developers
-theme: minima  # You can choose other themes or customize.
-markdown: kramdown
